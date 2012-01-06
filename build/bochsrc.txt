@@ -1,0 +1,22 @@
+# 64 mb of ram
+megs: 64
+
+# Bios images
+romimage: file = /usr/share/bochs/BIOS-bochs-latest	
+vgaromimage: file=/usr/share/bochs/VGABIOS-lgpl-latest
+
+# Mount our disk image as floppy 1
+floppya: 1_44=build/floppy.img, status=inserted
+boot: a
+
+# Save a log
+log: bochsout.txt
+
+# One CPU
+clock: sync=none
+cpu: count=1 ips=120000
+
+vga_update_interval: 250000
+
+# Enable magic breakpoint for debugging
+magic_break: enabled=1
