@@ -23,4 +23,6 @@ thread *syscall_sbrk(thread *th);
 thread *syscall_send(thread *th);
 thread *syscall_recieve(thread *th);
 thread *syscall_message_data(thread *th);
+thread *syscall_pull(thread *th);
+thread *syscall_push(thread *th);
 #endif

@@ -1,0 +1,7 @@
+This is the contents of MyFile!
+Awesome!
+
+
+It seems to work, really \t !
+
+1234567890

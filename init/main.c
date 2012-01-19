@@ -3,6 +3,8 @@
 #include <strings.h>
 #include <debug.h>
 #include <ipc.h>
+#include <vfs.h>
+#include <heap.h>
 // init
 
 typedef struct tar_fhead_st
@@ -69,12 +71,35 @@ void main()
 	_syscall_recieve((uint8_t *)drivers);
 
 	uint32_t vfs_num = start_daemon(tar_find(drivers,"vfs.elf"));
-	uint32_t ramfs_num = start_daemon(tar_find(drivers,"ramfs.elf"));
+	uint32_t ramfs_num = start_daemon(tar_find(drivers,"tarfs.elf"));
 	
 	send(ramfs_num, length, (uint8_t *)drivers);
 	
 	
 	_syscall_printf("\nHello! %x \n",vfs_num);
+	
+	
+	
+	CALLOCP(node, inode_t);
+	node->driver_num = ramfs_num;
+	node->inode_num = 1;
+
+	chdir(node);	
+	chroot(node);
+
+
+	
+	dirent_t *dent = readdir(node, 3);
+	
+	_syscall_printf(dent->name,0);
+	
+	uint32_t file = open("/myfile.txt");
+	_syscall_printf("Opened file %x", file);
+	file = open("/myfile.txt");
+	_syscall_printf("Opened file %x", file);
+	file = open("vfs.elf");
+	_syscall_printf("Opened file %x", file);
+	
 	for(;;);
 	_syscall_exit(0);
 	_syscall_printf("Not printed! %x",0);

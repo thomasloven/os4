@@ -25,4 +25,7 @@ void *malloc(uint32_t size);
 void *calloc(uint32_t size);
 void *valloc(uint32_t size);
 
+#define MALLOCP(NAME, TYPE) TYPE *NAME = (TYPE *)malloc(sizeof(TYPE))
+#define CALLOCP(NAME, TYPE) TYPE *NAME = (TYPE *)calloc(sizeof(TYPE))
+
 #endif

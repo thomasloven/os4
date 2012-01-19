@@ -11,3 +11,8 @@ typedef struct filp_struct
 	vnode_t *vnode;
 	uint32_t offset;
 } filp_t;
+
+filp_t *new_filp();
+void dup_filp(filp_t *filp);
+void put_filp(filp_t *filp);
+void drop_filp(filp_t *filp);

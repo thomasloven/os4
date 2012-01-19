@@ -1,7 +1,7 @@
 TARGET = drivers.tar
 SUBDIR = drivers
 
-DIRS = vfs ramfs
+DIRS = vfs tarfs
 
 .SUFFIXES:
 .SUFFIXES: .o .s .c
@@ -11,7 +11,7 @@ all: $(TARGET)
 $(TARGET): $(DIRS)
 	@echo "  tar     " $(TARGET)
 	@cp ./*/*.elf ./.
-	@tar -cf drivers.tar *.elf
+	tar -cf drivers.tar *.elf myfile.txt
 	@rm *.elf
 	
 $(DIRS):	force

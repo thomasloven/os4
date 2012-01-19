@@ -1,18 +1,97 @@
 #include <stdint.h>
 #include <vfs.h>
 #include <ipc.h>
+#include <heap.h>
 
 uint8_t inode_same(inode_t *a, inode_t *b)
 {
 	if(a->driver_num != b->driver_num)
 		return 0;
 		
-	if(a->inode_number != b->inode_number)
+	if(a->inode_num != b->inode_num)
 		return 0;
 		
 	return 1;
 }
 
+void chdir(inode_t *node)
+{
+	CALLOCP(message, vfsm);
+	message->m.msg_type = VFSM_CHWD;
+	memcopy((uint8_t *)&message->chwd.wd, (uint8_t *)node, sizeof(inode_t));
+
+	send2(VFS_PID,message);
+	free(waitmsg(VFS_PID,0));
+	
+	free(message);
+}
+
+void chroot(inode_t *node)
+{
+	CALLOCP(message, vfsm);
+	message->m.msg_type = VFSM_CHRD;
+	memcopy((uint8_t *)&message->chrd.rd, (uint8_t *)node, sizeof(inode_t));
+
+	send2(VFS_PID,message);
+	free(waitmsg(VFS_PID,0));
+	
+	free(message);
+}
+
+dirent_t dirent;
+
+dirent_t *readdir(inode_t *node, uint32_t offset)
+{
+	CALLOCP(message, vfsm);
+	message->m.msg_type = VFSM_READDIR;
+	memcopy((uint8_t *)&message->readdir.node, (uint8_t *)node, sizeof(inode_t));
+	message->readdir.num = offset;
+	
+	send2(VFS_PID, message);
+	
+	vfsm *reply = waitmsg(VFS_PID,0);
+	memcopy((uint8_t *)&dirent, (uint8_t *)&reply->readdir_reply.dirent, sizeof(dirent_t));
+	free(message);
+	free(reply);
+	
+	return &dirent;
+}
+
+uint32_t open(char *path)
+{
+	CALLOCP(message, vfsm);
+	message->m.msg_type = VFSM_OPEN;
+	message->open.path_len = strlen(path)+1;
+	message->open.path = path;
+	
+	send2(VFS_PID, message);
+	
+	vfsm *reply = waitmsg(VFS_PID,0);
+	uint32_t ret = reply->open_reply.filp;
+	free(message);
+	free(reply);
+	
+	return ret;
+}
+
+stat_t stat;
+
+stat_t *fstat(uint32_t filp)
+{
+	CALLOCP(message, vfsm);
+	message->m.msg_type = VFSM_FSTAT;
+	message->fstat.filp = filp;
+	
+	send2(VFS_PID, message);
+	
+	vfsm *reply = waitmsg(VFS_PID,0);
+	memcopy((uint8_t *)&stat, (uint8_t *)&reply->fstat_reply.node, sizeof(stat_t));
+	free(message);
+	free(reply);
+	return &stat;
+}
+
+/*
 uint32_t read(inode_t *node, uint32_t offset, uint32_t size, uint8_t *buffer)
 {
 	return 0;
@@ -73,3 +152,4 @@ inode_t *finddir(inode_t *node, char *name)
 	free(msg);
 	return &inode;
 }
+*/

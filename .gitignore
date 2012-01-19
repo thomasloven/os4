@@ -1,0 +1,7 @@
+*.[oa]
+newlib/
+newlib
+bochsout.txt
+grub.conf
+menu.lst
+.DS_store

@@ -2,11 +2,11 @@
 #include <syscalls.h>
 #include <ipc.h>
 
-extern void main(void);
+extern uint32_t main(void);
 
 void _init()
 {
 	signals_init();
 	_syscall_sbrk(-0x10000000);
-	main();
+	_syscall_exit(main());
 }

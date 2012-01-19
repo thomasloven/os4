@@ -8,6 +8,7 @@
 #include <vmm.h>
 #include <pmm.h>
 #include <k_messaging.h>
+#include <ipc.h>
 
 void init_syscalls()
 {
@@ -50,6 +51,10 @@ thread *syscall_handler(thread *th)
 			return syscall_recieve(th);
 		case SYSCALL_MSGD:
 			return syscall_message_data(th);
+		case SYSCALL_PULL:
+			return syscall_pull(th);
+		case SYSCALL_PUSH:
+			return syscall_push(th);
 
 		case SYSCALL_MAP:
 			return syscall_unsuported(th);
@@ -239,5 +244,25 @@ thread *syscall_message_data(thread *th)
 	th->r.eax = SYSC_OK;
 	th->r.ebx = message_sender(th);
 	th->r.ecx = message_length(th);
+	return th;
+}
+
+thread *syscall_pull(thread *th)
+{
+	// ebx = dst buffer
+	// ecx = src data
+	// edx = low: src pid, high: length
+	th->r.eax = SYSC_OK;
+	th->r.ecx = pull(th->r.ebx, th->r.ecx, (th->r.edx & 0xFFFF), (th->r.edx >>0x10));
+	return th;
+}
+
+thread *syscall_push(thread *th)
+{
+	// ebx = dst buffer
+	// ecx = src data
+	// edx = low: src pid, high: length
+	th->r.eax = SYSC_OK;
+	th->r.ecx = push((th->r.edx & 0xFFFF), th->r.ebx, th->r.ecx, (th->r.edx >>0x10));
 	return th;
 }

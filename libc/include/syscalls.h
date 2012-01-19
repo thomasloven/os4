@@ -20,6 +20,8 @@
 #define SYSCALL_SEND	0x110
 #define SYSCALL_RECV	0x111
 #define SYSCALL_MSGD	0x112
+#define SYSCALL_PULL	0x113
+#define SYSCALL_PUSH	0x114
 
 #define SYSCALL_MAP		0x500
 #define SYSCALL_UMAP	0x501
@@ -47,6 +49,8 @@ void _syscall_exec(uint32_t *image);
 void _syscall_send(uint32_t pid, uint32_t length, uint8_t *data);
 int32_t _syscall_message_data(uint32_t *pid);
 int32_t _syscall_recieve(uint8_t *buffer);
+int32_t _syscall_pull(uint8_t *src, uint8_t *dst, uint16_t pid, uint16_t length);
+int32_t _syscall_push(uint16_t pid, uint8_t *src, uint8_t *dst, uint16_t length);
 
 uint32_t errno;
 

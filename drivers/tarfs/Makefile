@@ -1,5 +1,5 @@
-TARGET := ramfs.elf
-SUBDIR := drivers/ramfs
+TARGET := tarfs.elf
+SUBDIR := drivers/tarfs
 
 SOURCES := $(patsubst %.s,%.o,$(shell find . -name "*.s"))
 SOURCES += $(patsubst %.c,%.o,$(shell find . -name "*.c"))

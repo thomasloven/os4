@@ -100,3 +100,17 @@ int32_t _syscall_recieve(uint8_t *buffer)
 	asm volatile("int $0xFF" : "=c" (ret), "=a" (errno) : "b" (buffer), "a" (SYSCALL_RECV));
 	return ret;
 }
+
+int32_t _syscall_pull(uint8_t *src, uint8_t *dst, uint16_t pid, uint16_t length)
+{
+	uint32_t ret;
+	asm volatile("int $0xFF" : "=c" (ret), "=a" (errno): "b" (src), "c" (dst), "d" ((length << 0x10) + pid), "a" (SYSCALL_PULL));
+	return ret;
+}
+
+int32_t _syscall_push(uint16_t pid, uint8_t *src, uint8_t *dst, uint16_t length)
+{
+	uint32_t ret;
+	asm volatile("int $0xFF" : "=c" (ret), "=a" (errno): "b" (src), "c" (dst), "d" ((length << 0x10) + pid), "a" (SYSCALL_PUSH));
+	return ret;
+}
