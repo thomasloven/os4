@@ -97,8 +97,12 @@ void main()
 	_syscall_printf("Opened file %x", file);
 	file = open("/myfile.txt");
 	_syscall_printf("Opened file %x", file);
-	file = open("vfs.elf");
-	_syscall_printf("Opened file %x", file);
+	
+	char *buffer = (char *)calloc(201);
+	uint32_t len = read(file, 200, buffer);
+	_syscall_printf("Read %x bytes of myfile.txt\n", len);
+	_syscall_printf(buffer, 0);
+	_syscall_printf(" end",0);
 	
 	for(;;);
 	_syscall_exit(0);

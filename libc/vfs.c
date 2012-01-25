@@ -84,16 +84,34 @@ stat_t *fstat(uint32_t filp)
 	
 	send2(VFS_PID, message);
 	
-	vfsm *reply = waitmsg(VFS_PID,0);
+	vfsm *reply = (vfsm *)waitmsg(VFS_PID,0);
 	memcopy((uint8_t *)&stat, (uint8_t *)&reply->fstat_reply.node, sizeof(stat_t));
 	free(message);
 	free(reply);
 	return &stat;
 }
 
+uint32_t read(uint32_t fp, uint32_t length, char *buffer)
+{
+	CALLOCP(message, vfsm);
+	message->m.msg_type = VFSM_READ;
+	message->read.filp = fp;
+	message->read.length = length;
+	message->read.buffer = buffer;
+	
+	send2(VFS_PID, message);
+	
+	vfsm *reply = (vfsm *)waitmsg(VFS_PID,0);
+	uint32_t ret = reply->read_reply.length;
+	free(reply);
+	return ret;
+}
+
+
 /*
 uint32_t read(inode_t *node, uint32_t offset, uint32_t size, uint8_t *buffer)
 {
+	
 	return 0;
 }
 

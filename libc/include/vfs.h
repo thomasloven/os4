@@ -23,6 +23,8 @@
 #define VFSM_READDIR	0x06
 #define VFSM_FSTAT		0x07
 #define VFSM_LOOKUP		0x08
+#define VFSM_READ		0x09
+#define VFSM_READ_INT	0x0A
 
 #define VFSM_REPLY	0x10
 #define VFSM_RMOUNT	0x20
@@ -164,6 +166,36 @@ typedef struct
 	uint32_t processed;
 } vfs_msg_lookup_mount;
 
+typedef struct
+{
+	uint32_t msg_type;
+	uint32_t filp;
+	uint32_t length;
+	char *buffer;
+} vfs_msg_read;
+
+typedef struct
+{
+	uint32_t msg_type;
+	uint32_t length;
+} vfs_msg_read_reply;
+
+typedef struct
+{
+	uint32_t msg_type;
+	inode_t node;
+	uint32_t offset;
+	uint32_t length;
+} vfs_msg_read_int;
+
+typedef struct
+{
+	uint32_t msg_type;
+	uint32_t length;
+	char *buffer;
+} vfs_msg_read_int_reply;
+
+
 typedef uint32_t (*read_ft)(inode_t*, uint32_t, uint32_t, uint8_t*);
 typedef uint32_t (*write_ft)(inode_t*, uint32_t, uint32_t, uint8_t*);
 typedef void (*open_ft)(inode_t*);
@@ -175,6 +207,10 @@ uint8_t inode_same(inode_t *a, inode_t *b);
 
 dirent_t *readdir(inode_t *node, uint32_t offset);
 inode_t *finddir(inode_t *node, char *name);
+
+uint32_t open(char *path);
+stat_t *fstat(uint32_t filp);
+uint32_t read(uint32_t fp, uint32_t length, char *buffer);
 
 void chdir(inode_t *node);
 void chroot(inode_t *node);
@@ -200,6 +236,10 @@ typedef union
 	vfs_msg_lookup lookup;
 	vfs_msg_lookup_reply lookup_reply;
 	vfs_msg_lookup_mount lookup_mount;
+	vfs_msg_read read;
+	vfs_msg_read_reply read_reply;
+	vfs_msg_read_int read_int;
+	vfs_msg_read_int_reply read_int_reply;
 } vfsm;
 
 #define ALLOC_VFSM(NAME, TYPE) vfsm *NAME = (vfsm *)malloc(sizeof(TYPE))

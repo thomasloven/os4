@@ -65,6 +65,9 @@ void main()
 			case VFSM_LOOKUP: ;
 				tarfs_lookup(message, sender);
 				break;
+			case VFSM_READ_INT: ;
+				tarfs_read(message, sender);
+				break;
 		}
 		
 		free(message);

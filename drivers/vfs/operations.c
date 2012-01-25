@@ -101,7 +101,8 @@ void vfs_open(vfsm *message, uint32_t sender)
 	while(fproc->filp[filp]) filp++;
 	
 	fproc->filp[filp] = new_filp();
-	
+	fproc->filp[filp]->vnode = vnode;
+	dup_filp(fproc->filp[filp]);
 
 	reply->open_reply.msg_type = VFSM_OPEN | VFSM_REPLY;
 	reply->open_reply.filp = filp;
@@ -119,4 +120,55 @@ void vfs_readdir(vfsm *message, uint32_t sender)
 	vfsm *reply = (vfsm *)waitmsg(message->readdir.node.driver_num,0);
 	send2(sender, reply);
 	free(reply);
+}
+
+void vfs_read(vfsm *message, uint32_t sender)
+{
+	if(message->m.msg_type != VFSM_READ)
+		return;
+		
+	CALLOCP(driver_msg, vfsm);
+_syscall_printf(".",0);
+	fproc_t *fproc = get_fproc(sender);
+	if(fproc->filp[message->read.filp])
+	{
+_syscall_printf(".",0);
+		filp_t *filp = fproc->filp[message->read.filp];
+_syscall_printf("\nfilp:%x", filp);
+_syscall_printf("\nnode:%x", filp->vnode);
+		memcopy((uint8_t *)&driver_msg->read_int.node, (uint8_t *)filp->vnode, sizeof(vnode_t));
+		uint32_t driver = driver_msg->read_int.node.driver_num;
+_syscall_printf(".",0);
+		driver_msg->read_int.msg_type = VFSM_READ_INT;
+
+		driver_msg->read_int.offset = filp->offset;
+		driver_msg->read_int.length = message->read.length;
+		send2(driver, driver_msg);
+_syscall_printf(".",0);
+		vfsm *reply = (vfsm *)waitmsg(driver,0);
+		if(reply->read_int_reply.length)
+		{
+			char *buffer = (char *)malloc(reply->read_int_reply.length);
+_syscall_printf(".",0);
+			_syscall_pull(buffer, reply->read_int_reply.buffer, driver, reply->read_int_reply.length);
+_syscall_printf(".",0);
+			_syscall_push(sender, message->read.buffer, buffer, reply->read_int_reply.length);
+_syscall_printf(".",0);			
+			message->m.msg_type = VFSM_READ | VFSM_REPLY;
+			message->read_reply.length = reply->read_int_reply.length;
+			reply->m.msg_type = VFSM_REPLY;
+			send2(driver, reply);
+_syscall_printf(".",0);
+			free(buffer);
+		} else {
+			message->m.msg_type = VFSM_READ | VFSM_REPLY;
+			message->read_reply.length = 0;
+		}
+		free(reply);
+	} else {
+		message->m.msg_type = VFSM_READ | VFSM_REPLY;
+		message->read_reply.length = 0;
+	}
+	send2(sender, message);
+	
 }

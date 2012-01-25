@@ -56,6 +56,36 @@ void tarfs_lookup(vfsm *message, uint32_t sender)
 	send2(sender, &message->lookup_reply);
 }
 
+uint32_t tarfs_read(vfsm *message, uint32_t sender)
+{
+		_syscall_printf("Read call %x", message->m.msg_type);
+	if(message->m.msg_type != VFSM_READ_INT)
+		return;
+		
+	tar_head *file = get_inode_tar(message->read_int.node.inode_num);
+	uint32_t offset = message->read_int.offset;
+	int32_t length = message->read_int.length;
+	if((offset + length) > tar_size(file->size))
+	{
+		length = tar_size(file->size) - offset;
+	}
+	if(length < 0) length = 0;
+	
+	char *data = (char *)((uint32_t)file + sizeof(tar_head) + offset);
+	
+	char *buffer = (char *)calloc(length);
+	
+	memcopy(buffer, data, length);
+	
+	message->read_int_reply.msg_type = VFSM_READ_INT | VFSM_REPLY;
+	message->read_int_reply.buffer = buffer;
+	message->read_int_reply.length = length;
+	
+	send2(sender, message);
+	
+	_syscall_printf("Read call2",0);
+}
+
 dirent_t *fs_readdir(inode_t *node, uint32_t num)
 {
 	directory *dir;
@@ -82,6 +112,8 @@ dirent_t *fs_readdir(inode_t *node, uint32_t num)
 	strcopy(&dirent.name, &d->entry.name);
 	return &dirent;
 }
+
+
 
 uint32_t fs_finddir(inode_t *node, char *name)
 {

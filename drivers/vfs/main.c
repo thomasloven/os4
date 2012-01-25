@@ -51,6 +51,9 @@ uint32_t main()
 				vfs_readdir(message, sender);
 				break;
 				
+			case VFSM_READ: ;
+				vfs_read(message, sender);
+				break;
 		}
 		
 		free(message);
